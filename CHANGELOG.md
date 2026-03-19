@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.1.0] - 2026-03-19
+
+### Fixed
+
+- Camera stream getting cut off by server wrapper write timeout
+- Log level not being set correctly
+
 ## [v0.0.5] - 2026-03-19
 
 test

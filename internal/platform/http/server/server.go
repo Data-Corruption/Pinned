@@ -15,9 +15,10 @@ func New(app *app.App, port int, handler http.Handler) error {
 	// create http server
 	var err error
 	app.Server, err = xhttp.NewServer(&xhttp.ServerConfig{
-		Addr:    fmt.Sprintf(":%d", port),
-		UseTLS:  false,
-		Handler: handler,
+		Addr:         fmt.Sprintf(":%d", port),
+		UseTLS:       false,
+		WriteTimeout: -1, // Disable global write timeout for MJPEG streams
+		Handler:      handler,
 		AfterListen: func() {
 			// tell systemd we're ready
 			fmt.Println("Listening on", app.BaseURL) // for user
