@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.1.1] - 2026-03-19
+
+### Added
+
+- Play/Pause on the camera feed so users don't burn though data unnecessarily
+- Websocket api section in the README
+
 ## [v0.1.0] - 2026-03-19
 
 ### Fixed

@@ -6,6 +6,7 @@ import { blockClicks, unblockClicks } from './ui.js';
 import { stopServer, restartServer } from './server.js';
 import { initSettings } from './settings.js';
 import { initPins } from './pins.js';
+import { initCamera } from './camera.js';
 
 // Initialize theme immediately (before DOM ready) to prevent flash
 initTheme();
@@ -22,4 +23,5 @@ document.addEventListener('DOMContentLoaded', () => {
     setupThemeToggle();
     initSettings();
     initPins();
+    initCamera();
 });

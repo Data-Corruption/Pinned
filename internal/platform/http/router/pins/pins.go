@@ -301,6 +301,11 @@ func (h *Hub) applyClientPatch(header int, patch PinSettingsPatch) {
 		settings.Pull = *patch.Pull
 	}
 
+	// Enforce hardwired hardware limitations on I2C pins
+	if gpio, ok := headerToGPIO[header]; ok && (gpio == 2 || gpio == 3) {
+		settings.Pull = PullUp
+	}
+
 	h.settings[header] = settings
 
 	// Persist to database in the background without blocking the hub

@@ -191,15 +191,25 @@
 
             <!-- Camera Feed Card -->
             <div class="card bg-base-200 shadow-md overflow-hidden">
-                <div class="bg-black relative min-h-[240px] flex items-center justify-center">
-                    <span class="text-base-content/40 text-sm absolute flex items-center gap-2">
+                <div id="camera-container" class="bg-black relative min-h-[240px] flex items-center justify-center cursor-pointer group" onclick="toggleCamera()">
+                    <span id="camera-status" class="text-base-content/40 text-sm absolute flex items-center gap-2 transition-opacity z-20">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                         Feed Offline
                     </span>
-                    <img src="/api/camera/stream" class="w-full h-auto object-cover relative z-10" alt="Camera Feed" 
-                         onerror="this.style.opacity='0'" onload="this.style.opacity='1'" style="opacity: 0; transition: opacity 0.3s;" />
+                    <!-- Pause Overlay -->
+                    <div id="camera-pause-overlay" class="absolute inset-0 bg-black/60 z-20 hidden items-center justify-center flex-col gap-2 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-white/50 text-xs font-semibold uppercase tracking-wider">Feed Paused</span>
+                    </div>
+                    <img id="camera-feed" src="/api/camera/stream" class="w-full h-auto object-cover relative z-10 transition-opacity" alt="Camera Feed" 
+                         onerror="window.handleCameraError && window.handleCameraError()" 
+                         onload="window.handleCameraLoad && window.handleCameraLoad()" 
+                         style="opacity: 0;" />
                 </div>
             </div>
 
