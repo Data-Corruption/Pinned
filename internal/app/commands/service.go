@@ -62,14 +62,6 @@ var Service = register(func(a *app.App) *cli.Command {
 						Name:  "port",
 						Usage: "set server port",
 					},
-					&cli.StringFlag{
-						Name:  "host",
-						Usage: "set server host (e.g., localhost, 0.0.0.0)",
-					},
-					&cli.IntFlag{
-						Name:  "proxy",
-						Usage: "set proxy port (0 = no proxy)",
-					},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					updated := false
@@ -81,14 +73,6 @@ var Service = register(func(a *app.App) *cli.Command {
 						}
 						if cmd.IsSet("port") {
 							cfg.Port = int(cmd.Int("port"))
-							updated = true
-						}
-						if cmd.IsSet("host") {
-							cfg.Host = cmd.String("host")
-							updated = true
-						}
-						if cmd.IsSet("proxy") {
-							cfg.ProxyPort = int(cmd.Int("proxy"))
 							updated = true
 						}
 						return nil

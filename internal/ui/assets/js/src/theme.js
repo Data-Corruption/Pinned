@@ -1,9 +1,9 @@
 // Theme Management
 // Handles dark/light theme switching with localStorage and system preference support
 
-const LIGHT_THEME = 'nord';
+const LIGHT_THEME = 'emerald';
 const DARK_THEME = 'forest';
-const THEME_KEY = 'SPROUT_THEME';
+const THEME_KEY = 'PINNED_THEME';
 
 /** Get current theme, defaulting to system preference */
 export function getTheme() {

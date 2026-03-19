@@ -141,10 +141,8 @@ func (a *App) Init(ctx context.Context, cmd *cli.Command) (context.Context, erro
 		cfg.Port = oPort
 	}
 
-	// calculate BaseURL
-	if a.BaseURL, err = getBaseURL(cfg); err != nil {
-		return ctx, fmt.Errorf("failed to get base URL: %w", err)
-	}
+	// calculate BaseURL (just for local cli)
+	a.BaseURL = fmt.Sprintf("http://localhost:%d", cfg.Port)
 	a.Log.Debugf("Base URL: %s", a.BaseURL)
 
 	// set UserAgent
@@ -248,18 +246,4 @@ func getRuntimePath(appName string) (string, error) {
 	}
 
 	return filepath.Join("/tmp", appName+"-"+username), nil
-}
-
-func getBaseURL(cfg *types.Configuration) (string, error) {
-	port := cfg.Port
-	host := cfg.Host
-	proxyPort := cfg.ProxyPort
-
-	// calculate that shit
-	host = x.Ternary(host != "", host, "localhost")
-	port = x.Ternary(proxyPort != 0, proxyPort, port)
-	hidePort := port == 80 || port == 443
-	scheme := x.Ternary(port == 443, "https", "http")
-	baseURL := fmt.Sprintf("%s://%s%s", scheme, host, x.Ternary(hidePort, "", fmt.Sprintf(":%d", port)))
-	return baseURL, nil
 }

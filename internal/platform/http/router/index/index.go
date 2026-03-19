@@ -1,4 +1,4 @@
-package settings
+package index
 
 import (
 	"encoding/json"
@@ -13,17 +13,18 @@ import (
 
 	"github.com/Data-Corruption/stdx/xhttp"
 	"github.com/go-chi/chi/v5"
+	"github.com/warthog618/go-gpiocdev"
 )
 
 func Register(a *app.App, r chi.Router) {
-	r.Get("/", handleGetSettings(a))
+	r.Get("/", handleGetIndex(a))
 	r.Post("/settings", handleUpdateSettings(a))
 	r.Post("/settings/stop", handleStop(a))
 	r.Post("/settings/restart", handleRestart(a))
 	r.Get("/settings/restart-status", handleRestartStatus(a))
 }
 
-func handleGetSettings(a *app.App) http.HandlerFunc {
+func handleGetIndex(a *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cfg, err := config.View(a.DB)
 		if err != nil {
@@ -34,17 +35,15 @@ func handleGetSettings(a *app.App) http.HandlerFunc {
 		data := map[string]any{
 			"CSS":             a.UI.CSS.URLPath,
 			"JS":              a.UI.JS.URLPath,
-			"Favicon":         template.URL(`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='.9em' font-size='90' text-anchor='middle'>🌱</text></svg>`),
-			"Title":           "Settings",
+			"Favicon":         template.URL(`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='.9em' font-size='90' text-anchor='middle'>📌</text></svg>`),
 			"Version":         a.BuildInfo().Version,
 			"UpdateAvailable": cfg.UpdateAvailable && (a.BuildInfo().Version != "vX.X.X"),
+			"MockGPIO":        len(gpiocdev.Chips()) == 0,
 			//  config fields
-			"LogLevel":  cfg.LogLevel,
-			"Port":      cfg.Port,
-			"Host":      cfg.Host,
-			"ProxyPort": cfg.ProxyPort,
+			"LogLevel": cfg.LogLevel,
+			"Port":     cfg.Port,
 		}
-		if err := a.UI.Execute(w, "settings.html", data); err != nil {
+		if err := a.UI.Execute(w, "index.html", data); err != nil {
 			xhttp.Error(r.Context(), w, err)
 			return
 		}
@@ -57,10 +56,8 @@ func handleUpdateSettings(a *app.App) http.HandlerFunc {
 
 		// Parse body - all fields are optional
 		var body struct {
-			LogLevel  *string `json:"logLevel"`
-			Host      *string `json:"host"`
-			Port      *int    `json:"port"`
-			ProxyPort *int    `json:"proxyPort"`
+			LogLevel *string `json:"logLevel"`
+			Port     *int    `json:"port"`
 		}
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&body); err != nil {
@@ -73,14 +70,8 @@ func handleUpdateSettings(a *app.App) http.HandlerFunc {
 			if body.LogLevel != nil {
 				cfg.LogLevel = *body.LogLevel
 			}
-			if body.Host != nil {
-				cfg.Host = *body.Host
-			}
 			if body.Port != nil {
 				cfg.Port = *body.Port
-			}
-			if body.ProxyPort != nil {
-				cfg.ProxyPort = *body.ProxyPort
 			}
 			return nil
 		}); err != nil {

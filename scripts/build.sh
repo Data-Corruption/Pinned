@@ -25,15 +25,15 @@ umask 022
 
 # Config --------------------------------------------------------------
 
-APP_NAME="sprout"
-RELEASE_URL="https://cd.example.com/"
-CONTACT_URL="https://github.com/DataCorruption/Sprout"
+APP_NAME="pinned"
+RELEASE_URL="https://cd.pinned.shdata.net"
+CONTACT_URL="https://github.com/DataCorruption"
 DEFAULT_LOG_LEVEL="warn"
 
 SERVICE="true"
-SERVICE_DESC="Sprout daemon"
+SERVICE_DESC="Pinned daemon"
 SERVICE_ARGS="service run"
-SERVICE_DEFAULT_PORT="8484"
+SERVICE_DEFAULT_PORT="7727"
 
 # -----------------------------------------------------------------------------
 
@@ -107,7 +107,7 @@ check_var() {
 dep_check() {
   local required_bins=(go gcc sed awk sha256sum gzip)
   if [[ "$MODE" != "local" || "$FAST_LOCAL" != "true" ]]; then
-    required_bins+=(aarch64-linux-gnu-gcc) # cross compile stuff for arm support
+    required_bins+=(aarch64-linux-gnu-gcc) # cross compile stuff for arm support. installed via gcc-aarch64-linux-gnu
   fi
 
   for bin in "${required_bins[@]}"; do
@@ -117,9 +117,12 @@ dep_check() {
     fi
   done
 
-  if [[ "$MODE" != "local" || "$FAST_LOCAL" != "true" ]] && command -v dpkg-query >/dev/null 2>&1 && ! dpkg-query -W -f='${Status}\n' libc6-dev-arm64-cross 2>/dev/null | grep -qx 'install ok installed'; then
-    printf "error: 'libc6-dev-arm64-cross' package is required but not installed\n" >&2
-    exit 1
+  if [[ "$MODE" != "local" || "$FAST_LOCAL" != "true" ]] && command -v dpkg-query >/dev/null 2>&1; then
+    if ! dpkg-query -W -f='${Status}\n' libc6-dev-arm64-cross 2>/dev/null | grep -qx 'install ok installed' || \
+       ! dpkg-query -W -f='${Status}\n' linux-libc-dev-arm64-cross 2>/dev/null | grep -qx 'install ok installed'; then
+      printf "error: 'libc6-dev-arm64-cross' and 'linux-libc-dev-arm64-cross' packages are required but not installed\n" >&2
+      exit 1
+    fi
   fi
 }
 

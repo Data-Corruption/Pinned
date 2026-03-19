@@ -3,7 +3,9 @@ package router
 import (
 	"net/http"
 	"sprout/internal/app"
-	"sprout/internal/platform/http/router/settings"
+	"sprout/internal/platform/http/router/index"
+	"sprout/internal/platform/http/router/camera"
+	"sprout/internal/platform/http/router/pins"
 	"strings"
 
 	"github.com/Data-Corruption/stdx/xlog"
@@ -30,7 +32,9 @@ func New(a *app.App) *chi.Mux {
 	r.Get("/assets/*", a.UI.ServeAsset)
 
 	// serve settings page / routes
-	settings.Register(a, r)
+	index.Register(a, r)
+	camera.Register(a, r)
+	pins.Register(a, r)
 
 	return r
 }

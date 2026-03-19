@@ -5,6 +5,7 @@ import { initTheme, setupThemeToggle, toggleTheme } from './theme.js';
 import { blockClicks, unblockClicks } from './ui.js';
 import { stopServer, restartServer } from './server.js';
 import { initSettings } from './settings.js';
+import { initPins } from './pins.js';
 
 // Initialize theme immediately (before DOM ready) to prevent flash
 initTheme();
@@ -20,4 +21,5 @@ window.unblockClicks = unblockClicks;
 document.addEventListener('DOMContentLoaded', () => {
     setupThemeToggle();
     initSettings();
+    initPins();
 });

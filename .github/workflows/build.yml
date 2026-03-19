@@ -32,6 +32,7 @@ jobs:
             gcc \
             gcc-aarch64-linux-gnu \
             libc6-dev-arm64-cross \
+            linux-libc-dev-arm64-cross \
             rclone
 
       - name: Build (and release if applicable)
