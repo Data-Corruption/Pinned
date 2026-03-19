@@ -92,10 +92,27 @@ func newHub(a *app.App) *Hub {
 	// Figure out the best GPIO chip (mock if not on Pi)
 	chips := gpiocdev.Chips()
 	if len(chips) > 0 {
-		// Just take the first one or logic it out
-		// For Pi 4, typically "pinctrl-bcm2711" or gpiochip4. Let's just blindly use the last one which is usually user gpio
-		h.chipName = chips[len(chips)-1]
-		a.Log.Infof("Using GPIO chip: %s", h.chipName)
+		var bestChip string
+		var maxLines int
+		
+		for _, chipName := range chips {
+			c, err := gpiocdev.NewChip(chipName)
+			if err == nil {
+				lines := c.Lines()
+				c.Close()
+				if lines > maxLines {
+					maxLines = lines
+					bestChip = chipName
+				}
+			}
+		}
+		
+		if bestChip != "" {
+			h.chipName = bestChip
+			a.Log.Infof("Using GPIO chip: %s (%d lines)", h.chipName, maxLines)
+		} else {
+			a.Log.Warnf("Found GPIO chips but could not access them (try checking groups). Using mock GPIO.")
+		}
 	} else {
 		a.Log.Warnf("No GPIO chips found (are you running on a Pi?). Using mock GPIO.")
 	}

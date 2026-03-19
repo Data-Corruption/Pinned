@@ -49,7 +49,7 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 				return
 			}
 			
-			out := dev.GetOutput()
+			_ = dev.GetFrames()
 
 			if err := dev.Start(context.Background()); err != nil {
 				dev.Close()
@@ -58,13 +58,20 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 				return
 			}
 			cam = dev
+			
+			out := dev.GetFrames()
 
 			go func() {
 				for frame := range out {
+					// Make a small copy so we can free the large hardware buffer back to the pool immediately.
+					buf := make([]byte, len(frame.Data))
+					copy(buf, frame.Data)
+					frame.Release()
+
 					viewerMu.Lock()
 					for v := range viewers {
 						select {
-						case v <- frame:
+						case v <- buf:
 						default:
 						}
 					}
@@ -95,6 +102,11 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 
 		mimeWriter := multipart.NewWriter(w)
 		w.Header().Set("Content-Type", fmt.Sprintf("multipart/x-mixed-replace; boundary=%s", mimeWriter.Boundary()))
+		
+		w.WriteHeader(http.StatusOK)
+		if flusher, ok := w.(http.Flusher); ok {
+			flusher.Flush()
+		}
 
 		partHeader := make(textproto.MIMEHeader)
 		partHeader.Add("Content-Type", "image/jpeg")
