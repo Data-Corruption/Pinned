@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"sprout/internal/app"
 	"sprout/internal/app/commands"
@@ -70,7 +72,10 @@ func main() {
 		Commands: subCommands,
 	}
 
-	if err := rootCommand.Run(context.Background(), os.Args); err != nil {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	if err := rootCommand.Run(ctx, os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

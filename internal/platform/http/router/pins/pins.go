@@ -163,6 +163,16 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	h.clients[cl] = struct{}{}
 
+	// Watch for app shutdown to proactively kill stuck websocket reads
+	go func() {
+		select {
+		case <-ctx.Done():
+		case <-h.a.Context.Done():
+			cancel()
+			c.Close(websocket.StatusGoingAway, "server shutting down")
+		}
+	}()
+
 	// Build sync message
 	syncMsg := SyncMsg{
 		Type: "sync",

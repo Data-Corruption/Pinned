@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.4] - 2026-03-19
+
+### Fixed
+
+- Camera stream and pin websocket not closing on app shutdown
+
 ## [v0.0.3] - 2026-03-19
 
 ### Fixed

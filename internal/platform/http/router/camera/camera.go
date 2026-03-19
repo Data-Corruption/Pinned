@@ -104,6 +104,8 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 			select {
 			case <-ctx.Done():
 				return
+			case <-a.Context.Done():
+				return
 			case frame := <-ch:
 				if len(frame) == 0 {
 					continue
