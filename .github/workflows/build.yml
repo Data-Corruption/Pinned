@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
 
@@ -49,6 +52,11 @@ jobs:
             gcc-aarch64-linux-gnu \
             libc6-dev-arm64-cross \
             linux-libc-dev-arm64-cross
+          
+          # Fix permissions so actions/cache can successfully save the APT archives
+          sudo chown -R "$(whoami):$(id -ng)" /var/cache/apt/archives
+          sudo chmod -R a+rX /var/cache/apt/archives
+          sudo rm -f /var/cache/apt/archives/lock
           
           # Install latest rclone via their official fast script (APT version is often old/slow)
           curl -fsSL https://rclone.org/install.sh | sudo bash
