@@ -26,6 +26,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Prepare APT cache permissions
+        run: |
+          sudo mkdir -p /var/cache/apt/archives
+          sudo chown -R "$(whoami):$(id -ng)" /var/cache/apt/archives
+
       - name: Cache APT packages
         uses: actions/cache@v4
         with:
