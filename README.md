@@ -6,9 +6,8 @@ No auth or built in security, just a simple server you run on your Pi, then acce
 
 ## Features
 - **Instant GPIO Control:** View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface. 
-- **MJPEG Camera Streaming:** Plop a USB webcam or Pi Camera into `/dev/video0` and it natively streams right over HTTP into the dashboard.
-- **Multiplayer:** Instant synchronous UI updates via WebSockets. If someone else toggles a pin or a hardware button triggers an edge event, the dashboard updates in real-time.
-- **Zero Config:** Auto-detects your system. Run it on your laptop and you get a safe "simulated" GPIO mock mode. Run it on your Pi and it grabs control of the actual hardware headers seamlessly!
+- **MJPEG Camera Streaming:** Plug in a USB webcam or Pi Camera and it natively streams into the dashboard (i.e. streams whatever is at `/dev/video0`).
+- **Multiplayer & Scriptable:** Programmatically control pins from Python, Node, or any other language via the [WebSocket API](#websocket-api). It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!
 
 ## Quick Start
 
