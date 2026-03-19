@@ -49,6 +49,8 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 				return
 			}
 			
+			out := dev.GetOutput()
+
 			if err := dev.Start(context.Background()); err != nil {
 				dev.Close()
 				viewerMu.Unlock()
@@ -57,8 +59,7 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 			}
 			cam = dev
 
-			go func(d *device.Device) {
-				out := d.GetOutput()
+			go func() {
 				for frame := range out {
 					viewerMu.Lock()
 					for v := range viewers {
@@ -69,7 +70,7 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 					}
 					viewerMu.Unlock()
 				}
-			}(dev)
+			}()
 		}
 
 		ch := make(chan []byte, 2)

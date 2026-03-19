@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.0.3] - 2026-03-19
+
+### Fixed
+
+- Camera feed not displaying
+- Documented gpio permission requirement
+
 ## [v0.0.2] - 2026-03-19
 
 ### Added
