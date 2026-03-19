@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build script for local development, CI releases, and operated mirrors. :p
+# Build script for local development, CI releases, and operated mirrors.
 #
 # Local:
 #   ./scripts/build.sh
