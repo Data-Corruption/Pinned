@@ -23,17 +23,35 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-cache-ubuntu-latest-${{ hashFiles('go.mod') }}
+          restore-keys: |
+            apt-cache-ubuntu-latest-
+
       - name: Install build dependencies
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          
+          # Force non-interactive installation to prevent prompts from hanging the build
+          export DEBIAN_FRONTEND=noninteractive
+          
+          # Enable APT caching
+          sudo rm -f /etc/apt/apt.conf.d/docker-clean
+          echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/keep-cache
+          
+          sudo -E apt-get update
+          sudo -E apt-get install -y --no-install-recommends \
             gcc \
             gcc-aarch64-linux-gnu \
             libc6-dev-arm64-cross \
-            linux-libc-dev-arm64-cross \
-            rclone
+            linux-libc-dev-arm64-cross
+          
+          # Install latest rclone via their official fast script (APT version is often old/slow)
+          curl -fsSL https://rclone.org/install.sh | sudo bash
 
       - name: Build (and release if applicable)
         shell: bash
