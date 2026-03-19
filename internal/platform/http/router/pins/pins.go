@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"sprout/internal/app"
+	"sprout/internal/platform/database/config"
+	"sprout/internal/types"
 	"sync"
 	"time"
 
@@ -13,27 +15,20 @@ import (
 	"github.com/warthog618/go-gpiocdev"
 )
 
-type PinDirection string
-type PinState string
-type PinPull string
+type PinDirection = types.PinDirection
+type PinState = types.PinState
+type PinPull = types.PinPull
+type PinSettings = types.PinSettings
 
 const (
-	DirInput  PinDirection = "input"
-	DirOutput PinDirection = "output"
-
-	StateLow  PinState = "low"
-	StateHigh PinState = "high"
-
-	PullNone PinPull = "none"
-	PullUp   PinPull = "up"
-	PullDown PinPull = "down"
+	DirInput  = types.DirInput
+	DirOutput = types.DirOutput
+	StateLow  = types.StateLow
+	StateHigh = types.StateHigh
+	PullNone  = types.PullNone
+	PullUp    = types.PullUp
+	PullDown  = types.PullDown
 )
-
-type PinSettings struct {
-	Direction PinDirection `json:"direction"`
-	State     PinState     `json:"state"`
-	Pull      PinPull      `json:"pull"`
-}
 
 type PinSettingsPatch struct {
 	Direction *PinDirection `json:"direction,omitempty"`
@@ -42,8 +37,8 @@ type PinSettingsPatch struct {
 }
 
 type SyncMsg struct {
-	Type string                 `json:"type"`
-	Pins map[int]SyncPinData    `json:"pins"`
+	Type string              `json:"type"`
+	Pins map[int]SyncPinData `json:"pins"`
 }
 
 type SyncPinData struct {
@@ -52,10 +47,10 @@ type SyncPinData struct {
 }
 
 type UpdateMsg struct {
-	Type      string            `json:"type"`
-	Pin       int               `json:"pin"`
-	Patch     PinSettingsPatch  `json:"patch"`
-	ValueHigh *bool             `json:"valueHigh,omitempty"`
+	Type      string           `json:"type"`
+	Pin       int              `json:"pin"`
+	Patch     PinSettingsPatch `json:"patch"`
+	ValueHigh *bool            `json:"valueHigh,omitempty"`
 }
 
 var headerToGPIO = map[int]int{
@@ -83,6 +78,8 @@ type Hub struct {
 	chipName string
 }
 
+// newHub creates and initializes a new GPIO WebSocket Hub. It loads persisted UI configurations
+// off the disk, enforces physical hardware constraints (like I2C pull-ups), and spawns event listeners on boot.
 func newHub(a *app.App) *Hub {
 	h := &Hub{
 		a:        a,
@@ -103,19 +100,49 @@ func newHub(a *app.App) *Hub {
 		a.Log.Warnf("No GPIO chips found (are you running on a Pi?). Using mock GPIO.")
 	}
 
+	// Load persisted settings
+	cfg, err := config.View(a.DB)
+	if err != nil {
+		a.Log.Warnf("failed to view config for pins db state: %v", err)
+	}
+
 	// Initialize state
-	for header := range headerToGPIO {
-		h.settings[header] = PinSettings{
+	for header, gpio := range headerToGPIO {
+		pull := PullNone
+		// GPIO 2 and 3 have physical hardwired 1.8k pull-ups
+		if gpio == 2 || gpio == 3 {
+			pull = PullUp
+		}
+
+		settings := PinSettings{
 			Direction: DirInput,
 			State:     StateLow,
-			Pull:      PullNone,
+			Pull:      pull,
 		}
-		h.values[header] = false
+
+		// Apply persisted settings if available
+		if cfg != nil && cfg.Pins != nil {
+			if saved, ok := cfg.Pins[header]; ok {
+				// Enforce hardwired hardware limitations
+				if gpio == 2 || gpio == 3 {
+					saved.Pull = PullUp
+				}
+				settings = saved
+			}
+		}
+
+		h.settings[header] = settings
+		h.values[header] = false // Corrected instantly by applyHardware
+
+		go h.applyHardware(header, settings)
 	}
 
 	return h
 }
 
+// handleWS upgrades an HTTP request to a WebSocket connection, injects the client into
+// the hub, and immediately transmits a complete sync payload to bring the frontend up to speed.
+// It then blocks, reading inbound messages indefinitely until disconnect.
 func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{
 		InsecureSkipVerify: true,
@@ -171,6 +198,9 @@ func (h *Hub) handleWS(w http.ResponseWriter, r *http.Request) {
 	h.removeClient(cl)
 }
 
+// writePump handles all outbound network transmission for a specific client.
+// Confining websocket writes to a dedicated goroutine guarantees we don't naturally execute
+// fatal concurrent writes to the same connection if multiple hardware edges trigger instantly.
 func (h *Hub) writePump(ctx context.Context, c *client) {
 	defer h.removeClient(c)
 	for {
@@ -193,6 +223,7 @@ func (h *Hub) writePump(ctx context.Context, c *client) {
 	}
 }
 
+// removeClient safely extracts the client from the hub's synchronized map and cleans up resources.
 func (h *Hub) removeClient(c *client) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -203,6 +234,9 @@ func (h *Hub) removeClient(c *client) {
 	}
 }
 
+// broadcast queues a message for transmission to every single connected browser tab.
+// If a client is stalling and the channel buffer is maxed out, it aggressively forces a disconnect
+// to prevent our hardware event-listeners from hitting blocked goroutine resource leaks.
 func (h *Hub) broadcast(msg interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -218,6 +252,9 @@ func (h *Hub) broadcast(msg interface{}) {
 	}
 }
 
+// applyClientPatch is triggered whenever the web dashboard sends a JSON mutation (e.g. user toggles a pin).
+// It updates the transient hub state, fires off an async database commit, and kicks off actual
+// hardware execution without blocking subsequent inbound messages.
 func (h *Hub) applyClientPatch(header int, patch PinSettingsPatch) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -238,11 +275,25 @@ func (h *Hub) applyClientPatch(header int, patch PinSettingsPatch) {
 	}
 
 	h.settings[header] = settings
-	
+
+	// Persist to database in the background without blocking the hub
+	go func(h_copy int, s_copy PinSettings) {
+		config.Update(h.a.DB, func(c *types.Configuration) error {
+			if c.Pins == nil {
+				c.Pins = make(map[int]PinSettings)
+			}
+			c.Pins[h_copy] = s_copy
+			return nil
+		})
+	}(header, settings)
+
 	// Apply to hardware asynchronously to avoid blocking the hub lock
 	go h.applyHardware(header, settings)
 }
 
+// applyHardware is the underlying system wrapper. It utilizes go-gpiocdev to open the Linux character device
+// with the requisite options. If a pin is requested as an input, it automatically wires up a kernel event
+// handler to rapidly react whenever the pin natively changes state (i.e. someone pushing a physical button).
 func (h *Hub) applyHardware(header int, settings PinSettings) {
 	h.mu.Lock()
 	gpio, ok := headerToGPIO[header]
@@ -288,7 +339,7 @@ func (h *Hub) applyHardware(header int, settings PinSettings) {
 		} else if settings.Pull == PullDown {
 			opts = append(opts, gpiocdev.WithPullDown)
 		}
-		
+
 		// Setup event handler
 		opts = append(opts, gpiocdev.WithEventHandler(func(evt gpiocdev.LineEvent) {
 			valHigh := evt.Type == gpiocdev.LineEventRisingEdge // if it isn't rising, it's falling (or no edge)
@@ -303,9 +354,9 @@ func (h *Hub) applyHardware(header int, settings PinSettings) {
 			// Create a patch that represents the current state logic (no patch, just valueHigh)
 			// Wait, the state doesn't change, just the read valueHigh
 			msg := UpdateMsg{
-				Type: "pin_update",
-				Pin:  header,
-				Patch: PinSettingsPatch{},
+				Type:      "pin_update",
+				Pin:       header,
+				Patch:     PinSettingsPatch{},
 				ValueHigh: &valHigh,
 			}
 			h.mu.Unlock()
@@ -336,6 +387,8 @@ func (h *Hub) applyHardware(header int, settings PinSettings) {
 	h.broadcastHardwareChange(header, settings, valHigh)
 }
 
+// broadcastHardwareChange propagates the final resolved hardware state downstream to the UI so it
+// visually matches reality (for example, if a pull-up input instantly reads HIGH natively without any web interference).
 func (h *Hub) broadcastHardwareChange(header int, settings PinSettings, valHigh bool) {
 	msg := UpdateMsg{
 		Type: "pin_update",

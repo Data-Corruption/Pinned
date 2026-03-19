@@ -17,6 +17,31 @@ type Configuration struct {
 	PreUpdateVersion string `json:"preUpdateVersion"`
 	// incremented on each service start (usually server listen or similar), used for detecting restarts
 	StartCounter int `json:"startCounter"`
+
+	// Persisted GPIO configuration map (header pin -> settings)
+	Pins map[int]PinSettings `json:"pins"`
+}
+
+type PinDirection string
+type PinState string
+type PinPull string
+
+const (
+	DirInput  PinDirection = "input"
+	DirOutput PinDirection = "output"
+
+	StateLow  PinState = "low"
+	StateHigh PinState = "high"
+
+	PullNone PinPull = "none"
+	PullUp   PinPull = "up"
+	PullDown PinPull = "down"
+)
+
+type PinSettings struct {
+	Direction PinDirection `json:"direction"`
+	State     PinState     `json:"state"`
+	Pull      PinPull      `json:"pull"`
 }
 
 func DefaultConfig() Configuration {
@@ -25,5 +50,6 @@ func DefaultConfig() Configuration {
 		Port:                build.Info().ServiceDefaultPort,
 		UpdateNotifications: true,
 		LastUpdateCheck:     time.Time{},
+		Pins:                make(map[int]PinSettings),
 	}
 }

@@ -120,6 +120,9 @@ export function createInitialPinsSnapshot() {
         const type = entry.type;
 
         const settings = { ...DEFAULT_PIN_SETTINGS };
+        if (entry.gpioID === 2 || entry.gpioID === 3) {
+            settings.pull = 'up';
+        }
         const valueHigh = settingsStateToValueHigh(settings.state);
 
         pins[headerPin] = {
