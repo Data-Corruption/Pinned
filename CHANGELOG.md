@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.2] - 2026-03-20
+
+### Added
+
+- Camera settings (resolution and fps limits)
+
 ## [v0.1.1] - 2026-03-19
 
 ### Added

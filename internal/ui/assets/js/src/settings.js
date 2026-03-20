@@ -15,6 +15,9 @@ function wireSettings() {
     handleTextInput('settings-host', '/settings', 'host', 500, { onSuccess: showRestartNotice });
     handleTextInput('settings-port', '/settings', 'port', 500, { onSuccess: showRestartNotice });
     handleTextInput('settings-proxy-port', '/settings', 'proxyPort', 500, { onSuccess: showRestartNotice });
+    handleTextInput('settings-camera-width', '/settings', 'cameraWidth', 500, { onSuccess: showRestartNotice });
+    handleTextInput('settings-camera-height', '/settings', 'cameraHeight', 500, { onSuccess: showRestartNotice });
+    handleTextInput('settings-camera-fps', '/settings', 'cameraFps', 500, { onSuccess: showRestartNotice });
 }
 
 /** Initialize all settings on DOMContentLoaded */

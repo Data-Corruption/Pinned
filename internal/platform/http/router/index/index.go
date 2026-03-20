@@ -40,8 +40,11 @@ func handleGetIndex(a *app.App) http.HandlerFunc {
 			"UpdateAvailable": cfg.UpdateAvailable && (a.BuildInfo().Version != "vX.X.X"),
 			"MockGPIO":        len(gpiocdev.Chips()) == 0,
 			//  config fields
-			"LogLevel": cfg.LogLevel,
-			"Port":     cfg.Port,
+			"LogLevel":     cfg.LogLevel,
+			"Port":         cfg.Port,
+			"CameraWidth":  cfg.CameraWidth,
+			"CameraHeight": cfg.CameraHeight,
+			"CameraFPS":    cfg.CameraFPS,
 		}
 		if err := a.UI.Execute(w, "index.html", data); err != nil {
 			xhttp.Error(r.Context(), w, err)
@@ -56,8 +59,11 @@ func handleUpdateSettings(a *app.App) http.HandlerFunc {
 
 		// Parse body - all fields are optional
 		var body struct {
-			LogLevel *string `json:"logLevel"`
-			Port     *int    `json:"port"`
+			LogLevel     *string `json:"logLevel"`
+			Port         *int    `json:"port"`
+			CameraWidth  *int    `json:"cameraWidth"`
+			CameraHeight *int    `json:"cameraHeight"`
+			CameraFPS    *int    `json:"cameraFps"`
 		}
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&body); err != nil {
@@ -72,6 +78,15 @@ func handleUpdateSettings(a *app.App) http.HandlerFunc {
 			}
 			if body.Port != nil {
 				cfg.Port = *body.Port
+			}
+			if body.CameraWidth != nil {
+				cfg.CameraWidth = *body.CameraWidth
+			}
+			if body.CameraHeight != nil {
+				cfg.CameraHeight = *body.CameraHeight
+			}
+			if body.CameraFPS != nil {
+				cfg.CameraFPS = *body.CameraFPS
 			}
 			return nil
 		}); err != nil {

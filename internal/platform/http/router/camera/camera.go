@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/textproto"
 	"sprout/internal/app"
+	"sprout/internal/platform/database/config"
 	"sync"
+	"time"
 
 	"github.com/Data-Corruption/stdx/xhttp"
 	"github.com/go-chi/chi/v5"
@@ -31,6 +33,13 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 		viewerMu.Lock()
 		empty := len(viewers) == 0
 		if empty && cam == nil {
+			cfg, err := config.View(a.DB)
+			if err != nil {
+				viewerMu.Unlock()
+				xhttp.Error(r.Context(), w, &xhttp.Err{Code: 500, Msg: "failed to read config", Err: err})
+				return
+			}
+
 			dev, err := device.Open("/dev/video0")
 			if err != nil {
 				viewerMu.Unlock()
@@ -40,8 +49,8 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 			
 			if err := dev.SetPixFormat(v4l2.PixFormat{
 				PixelFormat: v4l2.PixelFmtMJPEG,
-				Width:       640,
-				Height:      480,
+				Width:       uint32(cfg.CameraWidth),
+				Height:      uint32(cfg.CameraHeight),
 			}); err != nil {
 				dev.Close()
 				viewerMu.Unlock()
@@ -61,8 +70,24 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 			
 			out := dev.GetFrames()
 
-			go func() {
+			go func(fps int) {
+				var throttle <-chan time.Time
+				if fps > 0 {
+					ticker := time.NewTicker(time.Second / time.Duration(fps))
+					defer ticker.Stop()
+					throttle = ticker.C
+				}
+
 				for frame := range out {
+					if throttle != nil {
+						select {
+						case <-throttle:
+						default:
+							frame.Release()
+							continue
+						}
+					}
+
 					// Make a small copy so we can free the large hardware buffer back to the pool immediately.
 					buf := make([]byte, len(frame.Data))
 					copy(buf, frame.Data)
@@ -77,7 +102,7 @@ func handleGetStream(a *app.App) http.HandlerFunc {
 					}
 					viewerMu.Unlock()
 				}
-			}()
+			}(cfg.CameraFPS)
 		}
 
 		ch := make(chan []byte, 2)
