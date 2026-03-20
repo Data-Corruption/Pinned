@@ -1,3 +1,10 @@
+<img
+  src="screenshot.jpeg"
+  width="240"
+  alt="Pinned dashboard screenshot"
+  align="right"
+/>
+
 # 📌 Pinned
 
 `Pinned` is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5.
@@ -8,6 +15,8 @@ No auth or built in security, just a simple server you run on your Pi, then acce
 - **Instant GPIO Control:** View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface. 
 - **MJPEG Camera Streaming:** Plug in a USB webcam or any camera exposed at `/dev/video0` and it natively streams into the dashboard. That includes Pi Camera setups too, as long as they show up there.
 - **Multiplayer & Scriptable:** Programmatically control pins from Python, Node, or any other language via the [WebSocket API](#websocket-api). It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!
+
+<br clear="right" />
 
 ## Quick Start
 
