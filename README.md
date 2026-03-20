@@ -1,24 +1,28 @@
-<img
-  src="screenshot.jpeg"
-  width="240"
-  alt="Pinned dashboard screenshot"
-  align="right"
-/>
+<table>
+  <tr>
+    <td valign="top">
 
-# 📌 Pinned
+<h1>📌 Pinned</h1>
 
-`Pinned` is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5.
+<p><code>Pinned</code> is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5.</p>
 
-No auth or built in security, just a simple server you run on your Pi, then access from a browser on the same **local network**.
+<p>No auth or built in security, just a simple server you run on your Pi, then access from a browser on the same <strong>local network</strong>.</p>
 
-## Features
-- **Instant GPIO Control:** View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface. 
-- **MJPEG Camera Streaming:** Plug in a USB webcam or any camera exposed at `/dev/video0` and it natively streams into the dashboard. That includes Pi Camera setups too, as long as they show up there.
-- **Multiplayer & Scriptable:** Programmatically control pins from Python, Node, or any other language via the [WebSocket API](#websocket-api). It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!
+<h2>Features</h2>
+<ul>
+  <li><strong>Instant GPIO Control:</strong> View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface.</li>
+  <li><strong>MJPEG Camera Streaming:</strong> Plug in a USB webcam or any camera exposed at <code>/dev/video0</code> and it natively streams into the dashboard. That includes Pi Camera setups too, as long as they show up there.</li>
+  <li><strong>Multiplayer &amp; Scriptable:</strong> Programmatically control pins from Python, Node, or any other language via the <a href="#websocket-api">WebSocket API</a>. It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!</li>
+</ul>
 
-<br clear="right" />
+    </td>
+    <td valign="top" align="right">
+      <img src="screenshot.jpeg" width="240" alt="Pinned dashboard screenshot" />
+    </td>
+  </tr>
+</table>
 
-## Quick Start
+<h2>Quick Start</h2>
 
 **Prerequisites**
 - Raspberry Pi / any arm64 or x86_64 machine (for testing)
@@ -43,7 +47,7 @@ Then open `http://<Pi Local IP>:7727` in your browser.
 pinned uninstall
 ```
 
-## External Camera URL
+<h2>External Camera URL</h2>
 
 Using a webcam plugged into the Pi is convenient, but she _chews_ through data. Unfortunately most webcams don't emit H.264 and a Pi **cannot** recode in real-time lmao. So as a backup for cases where you need to reduce bandwidth, you can point Pinned at an external camera page/stream from another machine on your network with magic H.264 powers.
 
@@ -59,7 +63,7 @@ Pinned itself is not doing WebRTC here, it just embeds whatever URL you paste in
 5. Click **Start Streaming** in OBS.
 6. Open your **Pinned dashboard** settings, and paste the MediaMTX page it just built for you into the External Camera URL: `http://<YOUR_PC_LOCAL_IP>:8889/live/webcam`
 
-## WebSocket API
+<h2>WebSocket API</h2>
 
 To read or control the GPIO pins programmatically, connect your favorite client (Python, Node.js, Rust, etc.) to the WebSocket hub at `ws://<Pi Local IP>:7727/api/pins/ws`.
 
