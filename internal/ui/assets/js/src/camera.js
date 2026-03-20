@@ -49,3 +49,14 @@ export function initCamera() {
         `;
     };
 }
+
+/** Drop the active camera stream to free an HTTP/1.1 connection slot (MJPEG is long-lived; see restart polling). */
+export function releaseCameraConnection() {
+    const feed = document.getElementById('camera-feed');
+    if (!feed) return;
+    if (feed.tagName === 'IMG') {
+        feed.removeAttribute('src');
+    } else if (feed.tagName === 'IFRAME') {
+        feed.src = 'about:blank';
+    }
+}

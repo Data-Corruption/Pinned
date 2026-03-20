@@ -34,6 +34,22 @@ Then open `http://<Pi Local IP>:7727` in your browser.
 pinned uninstall
 ```
 
+## External Video Source (WebRTC)
+
+Using a webcam plugged into the Pi is convenient, but she _chews_ through data. Unfortunately most webcams don't emit H.264 and a Pi **cannot** recode in real-time lmao. So as a backup for cases where you need to reduce bandwidth, you can use an external camera source from a different machine on your network with magic H.264 powers.
+
+**OBS + MediaMTX** is a simple, flexible, low latency option. Here's a crash course:
+
+1. Download and run [MediaMTX](https://github.com/bluenviron/mediamtx) on your main PC (it's a tiny, single-file server).
+2. For resolution, bitrate, and fps, a sweet spot is 1280x720, 2000kbps, and 30fps (this might come after the next step for you).
+3. Go to **OBS** -> Settings -> Stream. 
+   - **Service:** Custom
+   - **Server:** `rtmp://localhost:1935/live`
+   - **Stream Key:** `webcam`
+4. Open **OBS** -> Settings -> Output. Change Output Mode to *Advanced*. Find your Video Encoder settings and make sure Profile is `baseline` and x264 options has `bframes=0`. WebRTC requires `0` B-frames for real-time streaming.
+5. Click **Start Streaming** in OBS.
+6. Open your **Pinned dashboard** settings, and paste the WebRTC interface MediaMTX just built for you into the External Camera URL: `http://<YOUR_PC_LOCAL_IP>:8889/live/webcam`
+
 ## WebSocket API
 
 To read or control the GPIO pins programmatically, connect your favorite client (Python, Node.js, Rust, etc.) to the WebSocket hub at `ws://<Pi Local IP>:7727/api/pins/ws`.

@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.1.4] - 2026-03-20
+
+### Fixed
+
+- The camera URL setting so it actually works lmao
+- The click blocker now blocks clicks. Crazy
+
 ## [v0.1.3] - 2026-03-20
 
 ### Added

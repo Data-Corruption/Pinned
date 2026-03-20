@@ -1,7 +1,23 @@
 // Server Actions
 // Backup modal, stop, restart, and polling functionality
 
+import { releaseCameraConnection } from './camera.js';
 import { blockClicks, unblockClicks, showError } from './ui.js';
+
+/** Delay after POST /settings/restart succeeds before the first status check */
+const RESTART_POLL_START_DELAY_MS = 500;
+/** Interval between restart-status polls while waiting for the new process */
+const RESTART_POLL_INTERVAL_MS = 1000;
+const RESTART_POLL_FETCH_TIMEOUT_MS = 8000;
+
+function fetchRestartStatus() {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), RESTART_POLL_FETCH_TIMEOUT_MS);
+    return fetch('/settings/restart-status?t=' + Date.now(), {
+        cache: 'no-store',
+        signal: c.signal,
+    }).finally(() => clearTimeout(t));
+}
 
 /** Stop the server */
 export function stopServer() {
@@ -35,6 +51,7 @@ export function restartServer() {
     // Close the modal
     document.getElementById('restart-modal').close();
 
+    releaseCameraConnection();
     blockClicks();
     fetch('/settings/restart', {
         method: 'POST',
@@ -44,7 +61,7 @@ export function restartServer() {
         .then(response => {
             if (response.ok || response.status === 202) {
                 // Server is restarting, poll for it to come back
-                setTimeout(() => pollForRestart(updateRequested), 3000);
+                setTimeout(() => pollForRestart(updateRequested), RESTART_POLL_START_DELAY_MS);
             } else {
                 throw new Error('Failed to restart server');
             }
@@ -58,7 +75,6 @@ export function restartServer() {
 /** Poll for server restart completion */
 export function pollForRestart(updateRequested = false) {
     const startTime = Date.now();
-    const pollInterval = 3000;
     const timeout = 300000; // 5 minutes
 
     const check = () => {
@@ -69,9 +85,14 @@ export function pollForRestart(updateRequested = false) {
         }
 
         console.log('Polling for restart...', { updateRequested, time: Date.now() - startTime });
-        fetch('/settings/restart-status?t=' + Date.now())
-            .then(res => res.json())
-            .then(data => {
+        fetchRestartStatus()
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                return res.json();
+            })
+            .then((data) => {
                 console.log('Poll response:', data);
                 if (data.restarted) {
                     if (updateRequested && !data.updated) {
@@ -83,13 +104,16 @@ export function pollForRestart(updateRequested = false) {
                         window.location.reload();
                     }
                 } else {
-                    setTimeout(check, pollInterval);
+                    setTimeout(check, RESTART_POLL_INTERVAL_MS);
                 }
             })
-            .catch(err => {
-                console.error('Poll network error (expected if restarting):', err);
-                // Network error during polling - server might be restarting
-                setTimeout(check, pollInterval);
+            .catch((err) => {
+                if (err.name === 'AbortError') {
+                    console.warn('Restart status poll timed out or aborted, retrying...');
+                } else {
+                    console.error('Poll network error (expected if restarting):', err);
+                }
+                setTimeout(check, RESTART_POLL_INTERVAL_MS);
             });
     };
 
