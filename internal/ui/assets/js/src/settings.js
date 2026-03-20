@@ -18,6 +18,7 @@ function wireSettings() {
     handleTextInput('settings-camera-width', '/settings', 'cameraWidth', 500, { onSuccess: showRestartNotice });
     handleTextInput('settings-camera-height', '/settings', 'cameraHeight', 500, { onSuccess: showRestartNotice });
     handleTextInput('settings-camera-fps', '/settings', 'cameraFps', 500, { onSuccess: showRestartNotice });
+    handleTextInput('settings-camera-url', '/settings', 'cameraUrl', 500, { onSuccess: showRestartNotice, skipEmpty: false });
 }
 
 /** Initialize all settings on DOMContentLoaded */

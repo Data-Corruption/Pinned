@@ -45,6 +45,7 @@ func handleGetIndex(a *app.App) http.HandlerFunc {
 			"CameraWidth":  cfg.CameraWidth,
 			"CameraHeight": cfg.CameraHeight,
 			"CameraFPS":    cfg.CameraFPS,
+			"CameraURL":    cfg.CameraURL,
 		}
 		if err := a.UI.Execute(w, "index.html", data); err != nil {
 			xhttp.Error(r.Context(), w, err)
@@ -64,6 +65,7 @@ func handleUpdateSettings(a *app.App) http.HandlerFunc {
 			CameraWidth  *int    `json:"cameraWidth"`
 			CameraHeight *int    `json:"cameraHeight"`
 			CameraFPS    *int    `json:"cameraFps"`
+			CameraURL    *string `json:"cameraUrl"`
 		}
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&body); err != nil {
@@ -87,6 +89,9 @@ func handleUpdateSettings(a *app.App) http.HandlerFunc {
 			}
 			if body.CameraFPS != nil {
 				cfg.CameraFPS = *body.CameraFPS
+			}
+			if body.CameraURL != nil {
+				cfg.CameraURL = *body.CameraURL
 			}
 			return nil
 		}); err != nil {

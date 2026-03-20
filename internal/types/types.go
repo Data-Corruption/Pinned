@@ -18,9 +18,10 @@ type Configuration struct {
 	// incremented on each service start (usually server listen or similar), used for detecting restarts
 	StartCounter int `json:"startCounter"`
 
-	CameraWidth  int `json:"cameraWidth"`
-	CameraHeight int `json:"cameraHeight"`
-	CameraFPS    int `json:"cameraFps"`
+	CameraWidth  int    `json:"cameraWidth"`
+	CameraHeight int    `json:"cameraHeight"`
+	CameraFPS    int    `json:"cameraFps"`
+	CameraURL    string `json:"cameraUrl"` // if set, bypasses hardware and embeds this URL
 
 	// Persisted GPIO configuration map (header pin -> settings)
 	Pins map[int]PinSettings `json:"pins"`
@@ -54,9 +55,9 @@ func DefaultConfig() Configuration {
 		Port:                build.Info().ServiceDefaultPort,
 		UpdateNotifications: true,
 		LastUpdateCheck:     time.Time{},
-		CameraWidth:         640,
-		CameraHeight:        480,
-		CameraFPS:           15,
+		CameraWidth:         320,
+		CameraHeight:        240,
+		CameraFPS:           4,
 		Pins:                make(map[int]PinSettings),
 	}
 }

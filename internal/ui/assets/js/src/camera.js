@@ -7,18 +7,18 @@ export function initCamera() {
     if (!container || !feed || !status || !pauseOverlay) return;
 
     let isPaused = false;
-    const streamUrl = '/api/camera/stream';
+    const streamUrl = feed.getAttribute('src');
 
     window.toggleCamera = () => {
         isPaused = !isPaused;
         if (isPaused) {
-            feed.src = '';
+            feed.removeAttribute('src');
             feed.style.opacity = '0';
             pauseOverlay.classList.remove('hidden');
             pauseOverlay.classList.add('flex');
             status.style.opacity = '0';
         } else {
-            feed.src = streamUrl;
+            feed.setAttribute('src', streamUrl);
             pauseOverlay.classList.add('hidden');
             pauseOverlay.classList.remove('flex');
             status.style.opacity = '1';

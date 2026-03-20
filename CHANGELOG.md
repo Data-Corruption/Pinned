@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.3] - 2026-03-20
+
+### Added
+
+- Camera URL setting for optionally using an external camera feed
+
 ## [v0.1.2] - 2026-03-20
 
 ### Added

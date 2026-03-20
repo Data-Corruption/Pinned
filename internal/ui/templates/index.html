@@ -173,6 +173,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="mt-3 flex flex-col gap-1 w-full">
+                    <label class="text-xs text-base-content/70">External Camera URL (overrides hardware)</label>
+                    <div class="flex items-center gap-2">
+                        <input type="url" id="settings-camera-url" class="input input-bordered w-full"
+                            value="{{ .CameraURL }}" placeholder="http://192.168.1.5:8080/stream or iframe src" />
+                        <span class="status hidden" role="status" aria-live="polite"></span>
+                    </div>
+                </div>
             </fieldset>
 
             <fieldset class="fieldset">
@@ -237,10 +245,16 @@
                         </svg>
                         <span class="text-white/50 text-xs font-semibold uppercase tracking-wider">Feed Paused</span>
                     </div>
-                    <img id="camera-feed" src="/api/camera/stream" class="w-full h-auto object-cover relative z-10 transition-opacity" alt="Camera Feed" 
+                    {{ if .CameraURL }}
+                    <iframe id="camera-feed" src="{{ .CameraURL }}" class="w-full h-full min-h-[320px] border-0 relative z-10 transition-opacity bg-black" 
+                         onload="window.handleCameraLoad && window.handleCameraLoad()" 
+                         style="opacity: 0;"></iframe>
+                    {{ else }}
+                    <img id="camera-feed" src="/api/camera/stream" class="w-full h-auto object-cover relative z-10 transition-opacity bg-black" alt="Camera Feed" 
                          onerror="window.handleCameraError && window.handleCameraError()" 
                          onload="window.handleCameraLoad && window.handleCameraLoad()" 
                          style="opacity: 0;" />
+                    {{ end }}
                 </div>
             </div>
 
