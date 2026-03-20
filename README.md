@@ -1,25 +1,20 @@
 <table>
-  <tr>
-    <td valign="top">
-
+<tr>
+<td valign="top">
 <h1>📌 Pinned</h1>
-
 <p><code>Pinned</code> is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5.</p>
-
 <p>No auth or built in security, just a simple server you run on your Pi, then access from a browser on the same <strong>local network</strong>.</p>
-
 <h2>Features</h2>
 <ul>
-  <li><strong>Instant GPIO Control:</strong> View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface.</li>
-  <li><strong>MJPEG Camera Streaming:</strong> Plug in a USB webcam or any camera exposed at <code>/dev/video0</code> and it natively streams into the dashboard. That includes Pi Camera setups too, as long as they show up there.</li>
-  <li><strong>Multiplayer &amp; Scriptable:</strong> Programmatically control pins from Python, Node, or any other language via the <a href="#websocket-api">WebSocket API</a>. It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!</li>
+<li><strong>Instant GPIO Control:</strong> View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface.</li>
+<li><strong>MJPEG Camera Streaming:</strong> Plug in a USB webcam or any camera exposed at <code>/dev/video0</code> and it natively streams into the dashboard. That includes Pi Camera setups too, as long as they show up there.</li>
+<li><strong>Multiplayer &amp; Scriptable:</strong> Programmatically control pins from Python, Node, or any other language via the <a href="#websocket-api">WebSocket API</a>. It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!</li>
 </ul>
-
-    </td>
-    <td valign="top" align="right">
-      <img src="screenshot.jpeg" width="240" alt="Pinned dashboard screenshot" />
-    </td>
-  </tr>
+</td>
+<td valign="top" align="right">
+<img src="screenshot.jpeg" width="600" alt="Pinned dashboard screenshot" />
+</td>
+</tr>
 </table>
 
 <h2>Quick Start</h2>
