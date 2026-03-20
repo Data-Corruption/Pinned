@@ -2,8 +2,7 @@
 <tr>
 <td valign="top">
 <h1>📌 Pinned</h1>
-<p><code>Pinned</code> is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5.</p>
-<p>No auth or built in security, just a simple server you run on your Pi, then access from a browser on the same <strong>local network</strong>.</p>
+<p><code>Pinned</code> is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5. No auth or built in security, just a simple server you run on your Pi, then access from a browser on the same <strong>local network</strong>.</p>
 <h2>Features</h2>
 <ul>
 <li><strong>Instant GPIO Control:</strong> View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface.</li>
