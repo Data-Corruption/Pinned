@@ -12,7 +12,7 @@
 </ul>
 </td>
 <td valign="top" align="right">
-<img src="screenshot.jpeg" width="600" alt="Pinned dashboard screenshot" />
+<img src="screenshot.jpeg" width="800" alt="Pinned dashboard screenshot" />
 </td>
 </tr>
 </table>
