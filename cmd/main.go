@@ -26,7 +26,7 @@ func main() {
 	rootCommand := &cli.Command{
 		Name:    app.BuildInfo().Name,
 		Version: app.BuildInfo().Version,
-		Usage:   "Sprout is a template for building Go services / cli apps.",
+		Usage:   "Pinned is a GPIO pin control and webcam streaming interface for Raspberry Pi 4/5.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "log",

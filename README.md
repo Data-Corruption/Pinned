@@ -6,7 +6,7 @@ No auth or built in security, just a simple server you run on your Pi, then acce
 
 ## Features
 - **Instant GPIO Control:** View and toggle GPIO directions (Input/Output), pull resistors, and logic states directly from the web interface. 
-- **MJPEG Camera Streaming:** Plug in a USB webcam or Pi Camera and it natively streams into the dashboard (i.e. streams whatever is at `/dev/video0`).
+- **MJPEG Camera Streaming:** Plug in a USB webcam or any camera exposed at `/dev/video0` and it natively streams into the dashboard. That includes Pi Camera setups too, as long as they show up there.
 - **Multiplayer & Scriptable:** Programmatically control pins from Python, Node, or any other language via the [WebSocket API](#websocket-api). It keeps the hardware, your scripts, and all web dashboards synchronized in real-time!
 
 ## Quick Start
@@ -34,11 +34,11 @@ Then open `http://<Pi Local IP>:7727` in your browser.
 pinned uninstall
 ```
 
-## External Video Source (WebRTC)
+## External Camera URL
 
-Using a webcam plugged into the Pi is convenient, but she _chews_ through data. Unfortunately most webcams don't emit H.264 and a Pi **cannot** recode in real-time lmao. So as a backup for cases where you need to reduce bandwidth, you can use an external camera source from a different machine on your network with magic H.264 powers.
+Using a webcam plugged into the Pi is convenient, but she _chews_ through data. Unfortunately most webcams don't emit H.264 and a Pi **cannot** recode in real-time lmao. So as a backup for cases where you need to reduce bandwidth, you can point Pinned at an external camera page/stream from another machine on your network with magic H.264 powers.
 
-**OBS + MediaMTX** is a simple, flexible, low latency option. Here's a crash course:
+Pinned itself is not doing WebRTC here, it just embeds whatever URL you paste into **External Camera URL**. **OBS + MediaMTX** is a simple, flexible, low latency option. Here's a crash course:
 
 1. Download and run [MediaMTX](https://github.com/bluenviron/mediamtx) on your main PC (it's a tiny, single-file server).
 2. For resolution, bitrate, and fps, a sweet spot is 1280x720, 2000kbps, and 30fps (this might come after the next step for you).
@@ -48,7 +48,7 @@ Using a webcam plugged into the Pi is convenient, but she _chews_ through data. 
    - **Stream Key:** `webcam`
 4. Open **OBS** -> Settings -> Output. Change Output Mode to *Advanced*. Find your Video Encoder settings and make sure Profile is `baseline` and x264 options has `bframes=0`. WebRTC requires `0` B-frames for real-time streaming.
 5. Click **Start Streaming** in OBS.
-6. Open your **Pinned dashboard** settings, and paste the WebRTC interface MediaMTX just built for you into the External Camera URL: `http://<YOUR_PC_LOCAL_IP>:8889/live/webcam`
+6. Open your **Pinned dashboard** settings, and paste the MediaMTX page it just built for you into the External Camera URL: `http://<YOUR_PC_LOCAL_IP>:8889/live/webcam`
 
 ## WebSocket API
 
